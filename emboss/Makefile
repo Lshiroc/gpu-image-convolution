@@ -129,6 +129,30 @@ emboss/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/emboss.dir/build.make CMakeFiles/emboss.dir/build
 .PHONY : emboss/fast
 
+kernel.o: kernel.cu.o
+.PHONY : kernel.o
+
+# target to build an object file
+kernel.cu.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/emboss.dir/build.make CMakeFiles/emboss.dir/kernel.cu.o
+.PHONY : kernel.cu.o
+
+kernel.i: kernel.cu.i
+.PHONY : kernel.i
+
+# target to preprocess a source file
+kernel.cu.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/emboss.dir/build.make CMakeFiles/emboss.dir/kernel.cu.i
+.PHONY : kernel.cu.i
+
+kernel.s: kernel.cu.s
+.PHONY : kernel.s
+
+# target to generate assembly for a file
+kernel.cu.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/emboss.dir/build.make CMakeFiles/emboss.dir/kernel.cu.s
+.PHONY : kernel.cu.s
+
 main.o: main.cu.o
 .PHONY : main.o
 
@@ -153,6 +177,30 @@ main.cu.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/emboss.dir/build.make CMakeFiles/emboss.dir/main.cu.s
 .PHONY : main.cu.s
 
+support.o: support.cu.o
+.PHONY : support.o
+
+# target to build an object file
+support.cu.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/emboss.dir/build.make CMakeFiles/emboss.dir/support.cu.o
+.PHONY : support.cu.o
+
+support.i: support.cu.i
+.PHONY : support.i
+
+# target to preprocess a source file
+support.cu.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/emboss.dir/build.make CMakeFiles/emboss.dir/support.cu.i
+.PHONY : support.cu.i
+
+support.s: support.cu.s
+.PHONY : support.s
+
+# target to generate assembly for a file
+support.cu.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/emboss.dir/build.make CMakeFiles/emboss.dir/support.cu.s
+.PHONY : support.cu.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -162,9 +210,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... emboss"
+	@echo "... kernel.o"
+	@echo "... kernel.i"
+	@echo "... kernel.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... support.o"
+	@echo "... support.i"
+	@echo "... support.s"
 .PHONY : help
 
 

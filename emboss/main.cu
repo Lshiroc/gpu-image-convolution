@@ -1,31 +1,27 @@
-#include <iostream>
 #include "support.h"
+#include "parser.h"
 #include "kernel.h"
 #include <opencv2/core.hpp>
 #include <opencv2/opencv.hpp>
-
-using namespace std;
-using namespace cv;
+#include <iostream>
 
 int main(int argc, char const *argv[]) {
 	cv::Mat img_h;
-	Image img_d;
+	Image img_in_d;
+	Image img_out_d;
 	Matrix M_h;
+	Options opts;
 
-	if (argc == 1) {
-		cout << "No image given\n";
-		return 0;
-	} else if (argc == 2) {
-		string img_path = cv::samples::findFile("../img2.png");
-		img_h = cv::imread(img_path, cv::IMREAD_COLOR);
-	} else {
-		cout << "Extra arguments provided, only 1 required\n";
-		return 0;
+	opts = parser(argc, argv);
+	img_h = cv::imread(opts.imgPath, cv::IMREAD_COLOR);
+	if (!img_h.isContinuous()) {
+		img_h = img_h.clone();
 	}
 
-	img_d = allocateImageDevice(img_h.cols, img_h.rows);
+	img_in_d = allocateImageDevice(img_h.cols, img_h.rows);
+	img_out_d = allocateImageDevice(img_h.cols, img_h.rows);
 	M_h = allocateMatrix(FILTER_SIZE, FILTER_SIZE);
-
+	
 	// Initialize Filter
 	M_h.elements[0] = -2;
 	M_h.elements[1] = -1;
@@ -37,27 +33,18 @@ int main(int argc, char const *argv[]) {
 	M_h.elements[7] = 1;
 	M_h.elements[8] = 2;
 
-/*	for (int i = 0; i < FILTER_SIZE; i++) {
-		for (int j = 0; j < FILTER_SIZE; j++) {
-			if (j == 0)
-				M_h.elements[i*FILTER_SIZE + j] = -1;
-			else if (j == FILTER_SIZE - 1)
-				M_h.elements[i*FILTER_SIZE + j] = 1;
-		}
-	}*/
-
-	copyFromHostToDevice(img_d, img_h.data);
+	copyFromHostToDevice(img_in_d, img_h.data);
 	cudaError_t cudaSymbolErr = cudaMemcpyToSymbol(M_c, M_h.elements,
 								FILTER_SIZE * FILTER_SIZE * sizeof(int));
 
 	if (cudaSymbolErr != cudaSuccess)
-		cout << "Error during cudaMemcpyToSymbol: " << cudaGetErrorString(cudaSymbolErr) << endl;
+		std::cout << "Error during cudaMemcpyToSymbol: " << cudaGetErrorString(cudaSymbolErr) << '\n';
 	cudaDeviceSynchronize();
 
 	// Launch kernel
 	cudaError_t cudaErr = cudaDeviceSynchronize();
 	if (cudaErr != cudaSuccess) {
-		cout << "Could not launch kernel" << endl;
+		std::cout << "Could not launch kernel" << '\n';
 		// Create your own FATAL()
 		return 0;
 	}
@@ -65,15 +52,20 @@ int main(int argc, char const *argv[]) {
 	dim3 dim_block(BLOCK_SIZE, BLOCK_SIZE);
 	dim3 dim_grid((img_h.cols + BLOCK_SIZE - 1) / BLOCK_SIZE, 
 			   (img_h.rows + BLOCK_SIZE - 1) / BLOCK_SIZE);
-	apply_emboss<<<dim_grid, dim_block>>>(img_d);
+	if (opts.grayscale) {
+		apply_grayscale<<<dim_grid, dim_block>>>(img_in_d);
+	}
+	apply_emboss<<<dim_grid, dim_block>>>(img_in_d, img_out_d, opts);
 	cudaDeviceSynchronize();
 
-	copyFromDeviceToHost(img_h.data, img_d);
+	copyFromDeviceToHost(img_h.data, img_out_d);
 	cv::imshow("Emboss filtered image", img_h);
-	waitKey(0);
+	cv::waitKey(0);
+	cv::imwrite("linux_gray_embossed.jpg", img_h);
 
-//	cudaFree(img_d);
-//	free(M_h);
+	cudaFree(img_in_d.elements);
+	cudaFree(img_out_d.elements);
+    free(M_h.elements);
 
 	return 0;
 }
