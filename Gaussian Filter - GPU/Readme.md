@@ -1,3 +1,5 @@
+# CUDA Gaussian Blur on RGB JPEG Images
+
 This part of the project implements a GPU-accelerated Gaussian blur filter using CUDA, supporting color (RGB) JPEG images. The implementation uses shared memory tiling, constant memory for the filter, and provides detailed timing breakdowns for performance analysis.
 
 Input:
