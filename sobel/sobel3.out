@@ -1,0 +1,5 @@
+Image size: 4032 x 3024
+GPU Sobel time: 0.100 ms
+CPU Sobel time: 54.923 ms
+Speedup: 547.30x
+Output written to edges3.png
