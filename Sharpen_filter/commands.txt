@@ -1,0 +1,2 @@
+chmod +x run_rgb.sh
+./run_rgb.sh

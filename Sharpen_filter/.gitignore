@@ -1,0 +1,12 @@
+# build / binaries
+sharpen
+*.o
+*.out
+
+# generated outputs
+*.ppm
+output.txt
+sharpened.png
+
+# misc
+*~

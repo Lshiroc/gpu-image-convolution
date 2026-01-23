@@ -1,0 +1,21 @@
+=== Sharpen filter executed ===
+CPU: Laplacian sharpen (amount=1.5, passes=1) (timed once)
+GPU: Laplacian sharpen (amount=1.5, passes=1) (avg over 20 repeats, warmup 5)
+
+=== Image / data ===
+W=300 H=220 Channels=3 Bytes=198000
+
+=== Timing (ms) ===
+CPU (passes=1): 0.697025
+H2D memcpy:   0.0632  (3.13291 GB/s)
+Kernel avg:   0.0104448  (total 0.208896 over 20)
+D2H memcpy:   0.042208  (4.69105 GB/s)
+
+=== CPU vs GPU correctness ===
+Max abs error: 0
+MSE:           0
+
+=== CPU vs GPU performance ===
+GPU end-to-end per pass: 0.115853  [H2D 0.0632 + kernel 0.0104448 + D2H 0.042208]
+Speedup (CPU / GPU kernel):   66.7342x
+Speedup (CPU / GPU end2end):  6.01647x
