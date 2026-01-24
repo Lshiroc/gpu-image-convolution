@@ -2,7 +2,7 @@
 #include "parser.h"
 #include <stdio.h>
 
-__constant__ int M_c[FILTER_SIZE * FILTER_SIZE];
+__constant__ float M_c[FILTER_SIZE * FILTER_SIZE];
 
 __global__ void apply_emboss(Image img_in, Image img_out, Options opts) {
 	int row = blockIdx.y*blockDim.y + threadIdx.y;
@@ -32,22 +32,21 @@ __global__ void apply_emboss(Image img_in, Image img_out, Options opts) {
 	}
 
 	int outLoc = row*img_in.width + col;
-	img_out.elements[outLoc*3] = (uchar) max(0, min(255, red_sum));
-	img_out.elements[outLoc*3 + 1] = (uchar) max(0, min(255, green_sum));
-	img_out.elements[outLoc*3 + 2] = (uchar) max(0, min(255, blue_sum));
-}
-
-__global__ void apply_grayscale(Image img_in) {
-	int row = blockIdx.y*blockDim.y + threadIdx.y;
-	int col = blockIdx.x*blockDim.x + threadIdx.x;
-	if (row >= img_in.height || col >= img_in.width) {
-		return;
+	float r = opts.depth * red_sum;
+	float g = opts.depth * green_sum;
+	float b = opts.depth * blue_sum;
+	if (opts.grayscale) {
+		r += 128;
+		g += 128;
+		b += 128;
+	} else {
+		r += img_in.elements[outLoc*3];
+		g += img_in.elements[outLoc*3 + 1];
+		b += img_in.elements[outLoc*3 + 2];
 	}
 
-	int loc = row*img_in.width + col;
-	int gray = 0.2126*img_in.elements[loc*3] + 0.7152*img_in.elements[loc*3 + 1] + 0.0722*img_in.elements[loc*3 + 2];
-	img_in.elements[loc*3] = gray;
-	img_in.elements[loc*3 + 1] = gray;
-	img_in.elements[loc*3 + 2] = gray;
+	img_out.elements[outLoc*3] = (uchar)max(0, min(255, (int)r));
+	img_out.elements[outLoc*3 + 1] = (uchar)max(0, min(255, (int)g));
+	img_out.elements[outLoc*3 + 2] = (uchar)max(0, min(255, (int)b));
 }
 

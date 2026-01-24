@@ -4,18 +4,16 @@
 #include <string>
 
 #define DEPTH_MIN	0
-#define DEPTH_MAX	100
+#define DEPTH_MAX	1
 #define ANGLE_MIN	0
-#define ANGLE_MAX	180
-#define FILTERSIZE_MIN	3
-#define FILTERSIZE_MAX	10
+#define ANGLE_MAX	360
 
 typedef struct {
 	std::string imgPath;
-	int depth{};
-	int angle{ 90 };
-	int filtersize{ 3 };
+	float depth{ 1.0f };
+	float angle{ 45.0f };
 	bool grayscale{};
+	bool isCPUEnabled{};
 } Options;
 Options parser(int argc, char const *argv[]);
 

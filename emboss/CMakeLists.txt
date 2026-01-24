@@ -26,13 +26,10 @@ else()
 endif()
 
 if(CMAKE_CUDA_COMPILER)
-    # Pass -w flag to nvlink to suppress warnings
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xnvlink -w")
-    # Or more specifically:
-    # set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wnvlink,-w")
 endif()
 
-add_executable(emboss main.cu support.cu kernel.cu parser.cpp)
-#set_property(TARGET emboss PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+add_executable(emboss main.cu support.cu kernel.cu parser.cu filter.cu)
+target_include_directories(emboss PRIVATE includes)
 target_link_libraries(emboss PUBLIC CUDA::cudart)
 target_link_libraries(emboss PUBLIC ${OpenCV_LIBS})
