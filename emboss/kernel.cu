@@ -36,6 +36,7 @@ __global__ void apply_emboss(Image img_in, Image img_out, Options opts) {
 	float g = opts.depth * green_sum;
 	float b = opts.depth * blue_sum;
 	if (opts.grayscale) {
+		r = g = b = 0.299f*r + 0.587f*g + 0.114f*b;
 		r += 128;
 		g += 128;
 		b += 128;

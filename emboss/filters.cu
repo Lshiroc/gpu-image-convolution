@@ -1,4 +1,4 @@
-#include "filter.h"
+#include "filters.h"
 #include "support.h"
 #include "parser.h"
 #include "kernel.h"
@@ -6,25 +6,26 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
-void emboss_gpu(cv::Mat *img, Options opts, Timer *timer) {
+void emboss_gpu(cv::Mat *img, Options opts) {
 	Matrix M_h;
 	Image img_in_d;
 	Image img_out_d;
+	Timer timer;
 
 	// Initializing the variables
 	std::cout << "Initializing variables\n";
-	startTime(timer);
+	startTime(&timer);
 
 	img_in_d = allocateImageDevice(img->cols, img->rows);
 	img_out_d = allocateImageDevice(img->cols, img->rows);
 	M_h = initializeFilter(FILTER_SIZE, FILTER_SIZE, opts.angle);
 
-	stopTime(timer);
-	std::cout << elapsedTime(*timer) << "s\n";
+	stopTime(&timer);
+	std::cout << elapsedTime(timer) << "s\n";
 
 	// Copying data from host to device
 	std::cout << "Copying data from host to device\n";
-	startTime(timer);
+	startTime(&timer);
 
 	copyFromHostToDevice(img_in_d, img->data);
 	cudaError_t cudaSymbolErr = cudaMemcpyToSymbol(M_c, M_h.elements,
@@ -34,12 +35,12 @@ void emboss_gpu(cv::Mat *img, Options opts, Timer *timer) {
 	}
 	cudaDeviceSynchronize();
 
-	stopTime(timer);
-	std::cout << elapsedTime(*timer) << "s\n";
+	stopTime(&timer);
+	std::cout << elapsedTime(timer) << "s\n";
 
 	// Launch kernel
 	std::cout << "Launching kernel\n";
-	startTime(timer);
+	startTime(&timer);
 
 	cudaError_t cudaErr = cudaDeviceSynchronize();
 	if (cudaErr != cudaSuccess) {
@@ -52,17 +53,17 @@ void emboss_gpu(cv::Mat *img, Options opts, Timer *timer) {
 	apply_emboss<<<dim_grid, dim_block>>>(img_in_d, img_out_d, opts);
 	cudaDeviceSynchronize();
 
-	stopTime(timer);
-	std::cout << elapsedTime(*timer) << "s\n";
+	stopTime(&timer);
+	std::cout << elapsedTime(timer) << "s\n";
 
 	// Copying data from device to host
 	std::cout << "Copying data from device to host\n";
-	startTime(timer);
+	startTime(&timer);
 
 	copyFromDeviceToHost(img->data, img_out_d);
 
-	stopTime(timer);
-	std::cout << elapsedTime(*timer) << "s\n";
+	stopTime(&timer);
+	std::cout << elapsedTime(timer) << "s\n";
 
 	// Free memory
 	cudaFree(img_in_d.elements);
@@ -70,14 +71,15 @@ void emboss_gpu(cv::Mat *img, Options opts, Timer *timer) {
     free(M_h.elements);
 }
 
-void emboss_cpu(cv::Mat *img, Options opts, Timer *timer) {
+void emboss_cpu(cv::Mat *img, Options opts) {
 	Matrix M_h;
 	Image img_in;
 	Image img_out;
+	Timer timer;
 
 	// Initializing the variables
 	std::cout << "Initializing variables\n";
-	startTime(timer);
+	startTime(&timer);
 
 	img_in = allocateImage(img->cols, img->rows);
 	img_out = allocateImage(img->cols, img->rows);
@@ -85,17 +87,17 @@ void emboss_cpu(cv::Mat *img, Options opts, Timer *timer) {
        img->cols * img->rows * img->elemSize());
 	M_h = initializeFilter(FILTER_SIZE, FILTER_SIZE, opts.angle);
 
-	stopTime(timer);
-	std::cout << elapsedTime(*timer) << "s\n";
+	stopTime(&timer);
+	std::cout << elapsedTime(timer) << "s\n";
 
 	// Applying filter
 	std::cout << "Applying filter\n";
-	startTime(timer);
+	startTime(&timer);
 
-	emboss_cpu_impl(img_in, &img_out, M_h, opts, timer);
+	emboss_cpu_impl(img_in, &img_out, M_h, opts);
 
-	stopTime(timer);
-	std::cout << elapsedTime(*timer) << "s\n";
+	stopTime(&timer);
+	std::cout << elapsedTime(timer) << "s\n";
 
 	memcpy(img->data, img_out.elements,
 		img_out.width * img_out.height * 3 * sizeof(uchar));
@@ -106,7 +108,7 @@ void emboss_cpu(cv::Mat *img, Options opts, Timer *timer) {
     free(M_h.elements);
 }
 
-void emboss_cpu_impl(Image img_in, Image *img_out, Matrix M_h, Options opts, Timer *timer) {
+void emboss_cpu_impl(Image img_in, Image *img_out, Matrix M_h, Options opts) {
 	for (int row = 0; row < img_in.height; row++) {
 		for (int col = 0; col < img_in.width; col++) {
 			if (row >= img_in.height || col >= img_in.width) {
@@ -137,6 +139,7 @@ void emboss_cpu_impl(Image img_in, Image *img_out, Matrix M_h, Options opts, Tim
 			float g = opts.depth * green_sum;
 			float b = opts.depth * blue_sum;
 			if (opts.grayscale) {
+				r = g = b = 0.299f*r + 0.587f*g + 0.114f*b;
 				r += 128;
 				g += 128;
 				b += 128;

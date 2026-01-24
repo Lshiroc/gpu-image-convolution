@@ -29,7 +29,7 @@ if(CMAKE_CUDA_COMPILER)
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xnvlink -w")
 endif()
 
-add_executable(emboss main.cu support.cu kernel.cu parser.cu filter.cu)
+add_executable(emboss main.cu support.cu kernel.cu parser.cu filters.cu)
 target_include_directories(emboss PRIVATE includes)
 target_link_libraries(emboss PUBLIC CUDA::cudart)
 target_link_libraries(emboss PUBLIC ${OpenCV_LIBS})
