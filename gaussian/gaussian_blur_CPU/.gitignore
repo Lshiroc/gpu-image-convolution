@@ -1,0 +1,7 @@
+# Build artifacts
+*.o
+*.out
+gaussian_cpu
+
+# CUDA / C++ binaries
+a.out

@@ -1,0 +1,6 @@
+Loaded: 4032x3024 channels: 3
+--- Starting CPU Benchmark ---
+CPU Time: 193249 ms
+--- Starting Optimized CPU ---
+Optimized CPU Time: 12246.8 ms
+Saved to cpu_result.png
